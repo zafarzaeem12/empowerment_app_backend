@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require('path');
 const app = express();
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -8,7 +9,7 @@ const databaseConnection = require('./database/databaseConnection')
 const UserRouter = require('./router/Users')
 // app routes end here
 
-
+app.use(express.static(path.join(__dirname + '/public')));
 app.use(express.json());
 app.use(cors());
 

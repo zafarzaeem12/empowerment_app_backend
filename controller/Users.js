@@ -3,55 +3,90 @@ const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 
-const Register_New_User = async (req, res) => {
+const Register_New_User = async (req, res , next) => {
   const typed_Email = req.body.email;
   const typed_phone_number = req.body.phone_number;
+
   try {
-    const check_email = await User.findOne({ email: typed_Email });
+    if (typed_Email) {
+      const check_email = await User.findOne({ email: typed_Email });
 
-    if (check_email?.email == typed_Email) {
-      res.send({
-        message: "this email is already exists",
-        status: 400,
-      });
-    } else if (typed_phone_number.length > 11) {
-      res.send({
-        message: "No phone_number more than exceed with 11 digits",
-        status: 400,
-      });
-    } else {
-      const userAvator = req?.files?.user_image?.map((data) =>
-        data?.path?.replace(/\\/g, "/")
-      );
-      const db = moment(req.body.dob, "YYYY-MM-DD").toDate();
-      const newUser = {
-        name: req.body.name,
-        email: typed_Email,
-        password: CryptoJS.AES.encrypt(
-          req.body.password,
-          process.env.SECRET_KEY
-        ).toString(),
-        user_image: userAvator,
-        phone_number: req.body.phone_number,
-        dob: db,
-        user_device_token: req.body.user_device_token || "asdfghjkl",
-        user_device_type: req.body.user_device_type || "android",
-      };
-      const Register = await User.create(newUser)
-
-      res.send({
-        message: `New User ${Register?.name} created Successfully`,
-        status: 201,
-        data: Register,
-      });
+      if (check_email) {
+        return res.status(400).send({
+          message: "This email is already registered.",
+        });
+      }
     }
+
+    const newUser = {
+      email: typed_Email,
+      password: CryptoJS.AES.encrypt(
+        req.body.password,
+        process.env.SECRET_KEY
+      ).toString(),
+      phone_number: typed_phone_number,
+      user_device_token: req.body.user_device_token || "asdfghjkl",
+      user_device_type: req.body.user_device_type || "android",
+    };
+
+    const Register = await User.create(newUser);
+
+    const { _id, ...others } = Register;
+
+    const num = Math.floor(Math.random() * 900000) + 100000;
+    const nums = await User.findOneAndUpdate(
+      { _id: _id },
+      {
+        $set: {
+          verification_code: num,
+        },
+      },
+      { new: true }
+    );
+    const {password , email , verification_code , ...othersfields  } = nums
+    return res.status(201).send({
+      message: "OTP sent for New user confirmation",
+      status: 201,
+      data: { verification_code , email },
+    });
   } catch (err) {
-    res.send({
-      message: err.message,
+    res.status(404).send({
+      message:"OTP not created",
       status: 404,
     });
   }
 };
+
+const Complete_Profile = async (req,res,next) => {
+  const email = req.query.email;
+try{
+  const find_email = await User.findOne({ email : email  });
+  const userAvator = req?.file?.path?.replace(/\\/g, "/")
+  const db = moment(req.body.dob)
+  const complete_profile = await User.updateOne(
+    {email : find_email.email},
+    {
+      $set:{
+        user_image : userAvator,
+        name : req.body.name,
+        dob : db.format('YYYY-MM-DD'),
+        gender : req.body.gender,
+        address : req.body.address,
+        state : req.body.state,
+        city : req.body.city,
+        user_is_profile_complete : true,
+        is_verified : true
+
+      }
+    },
+    { new : true}
+    )
+
+  res.send({data : complete_profile})
+}catch(err){
+  console.log(err)
+}
+}
 
 const LoginRegisteredUser = async (req, res, next) => {
   try {
@@ -399,5 +434,6 @@ module.exports = {
   OTP_Verification,
   User_Reset_Password,
   Turn_on_or_off_Notifications,
-  Logout_Existing_User
+  Logout_Existing_User,
+  Complete_Profile
 };

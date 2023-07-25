@@ -12,10 +12,11 @@ const {
     User_Reset_Password,
     Delete_and_Blocked_Existing_User_Temporaray,
     Turn_on_or_off_Notifications,
-    Logout_Existing_User
+    Logout_Existing_User,
+    Complete_Profile
 } = require('../controller/Users')
 
-router.post('/create_new_User' , File.upload , Register_New_User);
+router.post('/create_new_User' , File.user , Register_New_User);
 router.post('/login' ,  File.upload ,LoginRegisteredUser);
 router.get('/profile' ,auth ,File.upload ,VerifyRegisteredUser );
 router.put('/update',auth ,File.upload , Update_Existing_User );
@@ -26,5 +27,6 @@ router.post('/otp_verify' , File.upload , OTP_Verification);
 router.post('/reset_password' , File.upload , User_Reset_Password)
 router.put('/isnotify' , auth , File.upload ,  Turn_on_or_off_Notifications );
 router.post('/logout' , auth , Logout_Existing_User );
+router.post('/complete_profile' ,File.user , Complete_Profile )
 
 module.exports = router

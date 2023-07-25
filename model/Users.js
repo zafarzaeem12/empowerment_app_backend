@@ -6,8 +6,6 @@ const UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        unique: true,
-        required: true
     },
     password: {
         type: String,
@@ -15,16 +13,29 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     user_image: {
-        type: Array,
-         required: true
+        type: String,
     },
     phone_number: {
         type: String,
-        required: true
+        // required: true
     },
     dob: {
         type: String,
-        required: true
+       // required: true
+    },
+    address: {
+        type: String,
+    },
+    gender:{
+        type:String,
+        enum : ['Male','Female' , 'Prefer Not to Say'],
+        default: 'Male'
+    },
+    state: {
+        type: String,
+    },
+    city: {
+        type: String,
     },
     verification_code :{
         type:Number,
