@@ -74,6 +74,7 @@ try{
         address : req.body.address,
         state : req.body.state,
         city : req.body.city,
+        role : req.body.role,
         user_is_profile_complete : true,
         is_verified : true
 
@@ -82,9 +83,17 @@ try{
     { new : true}
     )
 
-  res.send({data : complete_profile})
+  res
+  .status(200)
+  .send({
+     message : "Profile Completed Successfully" ,
+    })
 }catch(err){
-  console.log(err)
+  res
+  .status(404)
+  .send({
+     message : "Profile Not Completed",
+    })
 }
 }
 
@@ -111,27 +120,37 @@ const LoginRegisteredUser = async (req, res, next) => {
     } else if (password !== original_password) {
       res.send({ message: "Password Not Matched" });
     } else {
-      const token = jwt.sign(
-        {
-          id: LoginUser._id,
-        },
-        process.env.SECRET_KEY,
-        { expiresIn: "1h" }
-      );
-      const save_token = await User.findByIdAndUpdate(
-        { _id: LoginUser?._id?.toString() },
-        { $set: { user_authentication: `${token}` } },
-        { new: true }
-      );
-      const { user_authentication } = save_token;
-
-      res.send({
-        message: "Login Successful",
-        status: 200,
-        data: { user_authentication },
-      });
-    }
-  } catch (err) {
+      if (LoginUser.role === "User" || LoginUser.role === "Admin") {
+        const expiresIn = LoginUser.role === "User" ? "1h" : "23h";
+        const token = jwt.sign(
+          {
+            id: LoginUser._id,
+            role: LoginUser.role
+          },
+          process.env.SECRET_KEY,
+          { expiresIn }
+        );
+      
+        const save_token = await User.findByIdAndUpdate(
+          { _id: LoginUser?._id?.toString() },
+          { $set: { user_authentication: `${token}` } },
+          { new: true }
+        );
+        const { user_authentication } = save_token;
+      
+        res.send({
+          message: "Login Successful",
+          status: 200,
+          data: { user_authentication }
+        });
+      } else {
+        res.send({
+          message: "Invalid role",
+          status: 403
+        });
+      }
+  }
+} catch (err) {
     res.send({
       message: "Login Failed",
       status: 404,

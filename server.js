@@ -7,6 +7,7 @@ const databaseConnection = require('./database/databaseConnection')
 
 // app routes start here
 const UserRouter = require('./router/Users')
+const PreferenceRouter = require('./router/Preferences')
 // app routes end here
 
 app.use(express.static(path.join(__dirname + '/public')));
@@ -15,6 +16,7 @@ app.use(cors());
 
 // app routes use here
 app.use("/UserAPI/", UserRouter);
+app.use("/PreferenceAPI/", PreferenceRouter);
 // routes end here
 
 dotenv.config();
