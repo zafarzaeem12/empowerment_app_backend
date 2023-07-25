@@ -8,6 +8,9 @@ const databaseConnection = require('./database/databaseConnection')
 // app routes start here
 const UserRouter = require('./router/Users')
 const PreferenceRouter = require('./router/Preferences')
+const TypesRouter = require('./router/Types')
+const LikedRouter = require('./router/Likeed')
+const CommentsRouter = require('./router/Comments')
 // app routes end here
 
 app.use(express.static(path.join(__dirname + '/public')));
@@ -17,6 +20,9 @@ app.use(cors());
 // app routes use here
 app.use("/UserAPI/", UserRouter);
 app.use("/PreferenceAPI/", PreferenceRouter);
+app.use("/TypesAPI/", TypesRouter);
+app.use("/LikedAPI/", LikedRouter);
+app.use("/CommentsAPI/", CommentsRouter);
 // routes end here
 
 dotenv.config();
