@@ -39,7 +39,7 @@ const Get_All_Comments  = async (req,res,next) => {
               }
             }, {
               '$unset': [
-                'updatedAt', '__v', 'User_id', 'Types_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
+                'updatedAt', '__v', 'User_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
               ]
             }, {
               '$sort': {

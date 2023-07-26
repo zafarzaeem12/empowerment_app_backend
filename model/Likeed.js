@@ -4,8 +4,8 @@ const LikedSchema = new mongoose.Schema({
 
     Liked_type:{
         type:String,
-        enum : ['Love_Heart','Like' , 'DisLike'],
-        default: 'Like'
+        enum : ['Love_Heart','Like' , 'DisLike','none'],
+        default: 'none'
     },
     Types_id:{
         type : mongoose.Schema.Types.ObjectId,
