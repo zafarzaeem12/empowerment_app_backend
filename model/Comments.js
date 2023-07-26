@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 
-const PreferencesSchema = new mongoose.Schema({
-    name: {
+const CommentSchema = new mongoose.Schema({
+    comments: {
         type: String,
     },
     User_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'User'
+    },
+    Types_id:{
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'Types'
     },
     status :{
         type: Boolean,
@@ -16,4 +20,4 @@ const PreferencesSchema = new mongoose.Schema({
 },
     { timestamps: true }
 )
-module.exports = mongoose.model("Preferences", PreferencesSchema);
+module.exports = mongoose.model("Comment", CommentSchema);

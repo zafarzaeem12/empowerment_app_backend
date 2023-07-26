@@ -2,12 +2,12 @@ const router = require('express').Router();
 const auth = require('../middleware/Authentication');
 const File = require('../middleware/ImagesandVideosData');
 const { 
-    Create_New_Preference,
-    Get_New_Preference
-} = require('../controller/Preferences')
+    Create_New_Comments,
+    Get_All_Comments
+} = require('../controller/Comments')
 
-router.post('/create_preference' ,auth , File.user , Create_New_Preference);
-router.get('/get_preference' ,auth ,File.user , Get_New_Preference );
+router.post('/create_comments' ,auth , File.user , Create_New_Comments);
+router.get('/get_comments' ,auth ,File.user , Get_All_Comments );
 
 
 module.exports = router

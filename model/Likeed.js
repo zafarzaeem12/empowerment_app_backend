@@ -11,6 +11,10 @@ const LikedSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Types'
     },
+    User_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref : 'User'
+    },
     status:{
         type : Boolean,
         default : true

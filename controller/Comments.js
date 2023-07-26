@@ -1,46 +1,57 @@
-const Preferences = require('../model/Preferences')
-const Users = require('../model/Users')
+const Comments = require('../model/Comments')
 
-const Create_New_Preference  = async (req,res,next) => {
+
+const Create_New_Comments  = async (req,res,next) => {
     try{
 
-        const check_Admin = await Users.findOne({ _id : req.body.User_id })
+       const data = {
+        comments : req.body.comments,
+        User_id : req.body.User_id,
+        Types_id : req.body.Types_id
+       }
 
-        if(check_Admin.role === "User") {
-            return res.status(404).send({ message : "you are not admin" })
-        }
-
-        const already = await Preferences.find({  name : req.body.name })
-        
-        if(already.length > 0) {
-            return res.status(404).send({ message : "Preference already added" })
-        }
-
-
-        const category = {
-            name : req.body.name,
-            User_id : req.body.User_id
-        }
-        const created_preference = await Preferences.create(category);
+       const create_comments = await Comments.create(data)
 
         res.status(200).send({
-            message : "Preference Created",
-            data :created_preference
+            message : "Comment Created",
+            data :create_comments
         })
     }catch(err){
         res.status(404).send({
-            message : "No Preference Found"
+            message : "No Comment Found"
         })
     }
 }
 
-const Get_New_Preference  = async (req,res,next) => {
+const Get_All_Comments  = async (req,res,next) => {
     try{
-        const prefer_data = await Preferences.find({ status : true });
+        const data = [
+            {
+              '$lookup': {
+                'from': 'users', 
+                'localField': 'User_id', 
+                'foreignField': '_id', 
+                'as': 'Comment_User'
+              }
+            }, {
+              '$unwind': {
+                'path': '$Comment_User'
+              }
+            }, {
+              '$unset': [
+                'updatedAt', '__v', 'User_id', 'Types_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
+              ]
+            }, {
+              '$sort': {
+                'createdAt': -1
+              }
+            }
+          ]
+        const comment_data = await Comments.aggregate(data);
         res.status(200).send({
-            total : prefer_data.length,
-            message : `Total ${prefer_data.length} Preferences Fetched`,
-            data : prefer_data
+            total : comment_data.length,
+            message : `Total ${comment_data.length} Comments Fetched`,
+            data : comment_data
         })
     }catch(err){
         res.status(404).send({
@@ -53,6 +64,6 @@ const Get_New_Preference  = async (req,res,next) => {
 
 
 module.exports = {
-    Create_New_Preference,
-    Get_New_Preference
+    Create_New_Comments,
+    Get_All_Comments
 }
