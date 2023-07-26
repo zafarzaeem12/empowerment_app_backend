@@ -1,5 +1,5 @@
 const Comments = require('../model/Comments')
-
+var mongoose = require('mongoose');
 
 const Create_New_Comments  = async (req,res,next) => {
     try{
@@ -23,30 +23,40 @@ const Create_New_Comments  = async (req,res,next) => {
     }
 }
 
-const Get_All_Comments  = async (req,res,next) => {
+const Get_All_Comments_on_Post  = async (req,res,next) => {
+  const post_id = req.query.Types_id
+  const id = new mongoose.Types.ObjectId(post_id);
+
     try{
-        const data = [
-            {
-              '$lookup': {
-                'from': 'users', 
-                'localField': 'User_id', 
-                'foreignField': '_id', 
-                'as': 'Comment_User'
-              }
-            }, {
-              '$unwind': {
-                'path': '$Comment_User'
-              }
-            }, {
-              '$unset': [
-                'updatedAt', '__v', 'User_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
-              ]
-            }, {
-              '$sort': {
-                'createdAt': -1
-              }
-            }
+     const data = [
+        {
+          '$match': {
+            'Types_id': id
+          }
+        }, {
+          '$lookup': {
+            'from': 'users', 
+            'localField': 'User_id', 
+            'foreignField': '_id', 
+            'as': 'Comment_User'
+          }
+        }, {
+          '$unwind': {
+            'path': '$Comment_User'
+          }
+        }, {
+          '$unset': [
+            'updatedAt', '__v', 'User_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
           ]
+        }, {
+          '$sort': {
+            'createdAt': -1
+          }
+        }, 
+        // {
+        //   '$count': 'Total_Comments_on_Post'
+        // }
+      ]
         const comment_data = await Comments.aggregate(data);
         res.status(200).send({
             total : comment_data.length,
@@ -65,5 +75,5 @@ const Get_All_Comments  = async (req,res,next) => {
 
 module.exports = {
     Create_New_Comments,
-    Get_All_Comments
+    Get_All_Comments_on_Post
 }

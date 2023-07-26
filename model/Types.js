@@ -5,10 +5,14 @@ const  TypesSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref : 'User'
     },
-    Preferences_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'Preferences'
-    },
+    category:[
+                {Preferences :
+                        {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref : 'Preferences'
+                        }
+                }
+    ],
     description: {
         type: String,
     },
