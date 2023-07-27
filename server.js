@@ -11,6 +11,7 @@ const PreferenceRouter = require('./router/Preferences')
 const TypesRouter = require('./router/Types')
 const LikedRouter = require('./router/Likeed')
 const CommentsRouter = require('./router/Comments')
+const ReportsRouter = require('./router/Report')
 // app routes end here
 
 app.use(express.static(path.join(__dirname + '/public')));
@@ -23,6 +24,7 @@ app.use("/PreferenceAPI/", PreferenceRouter);
 app.use("/TypesAPI/", TypesRouter);
 app.use("/LikedAPI/", LikedRouter);
 app.use("/CommentsAPI/", CommentsRouter);
+app.use("/ReportAPI/", ReportsRouter);
 // routes end here
 
 dotenv.config();

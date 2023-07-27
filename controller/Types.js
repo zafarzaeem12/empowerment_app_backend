@@ -53,6 +53,7 @@ const Create_Types = async (req,res,next) => {
 }
 
 const Get_Post = async (req,res,next) => {
+  const id = new mongoose.Types.ObjectId(req.id);
  try{
 
     const data =
@@ -106,6 +107,38 @@ const Get_Post = async (req,res,next) => {
         }
       }, {
         '$lookup': {
+          'from': 'reports', 
+          'localField': '_id', 
+          'foreignField': 'reported_on_Types_id', 
+          'as': 'Reported_User'
+        }
+      }, {
+        '$addFields': {
+          'On_reported_Post': '$Reported_User'
+        }
+      }, {
+        '$lookup': {
+          'from': 'users', 
+          'localField': 'On_reported_Post.reported_User_id', 
+          'foreignField': '_id', 
+          'as': 'Details_for_Reported_User'
+        }
+      }, {
+        '$match': {
+          '$expr': {
+            '$and': [
+              {
+                '$not': {
+                  '$in': [
+                    id, '$On_reported_Post.reported_User_id'
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }, {
+        '$lookup': {
           'from': 'users', 
           'localField': 'User_id', 
           'foreignField': '_id', 
@@ -130,6 +163,7 @@ const Get_Post = async (req,res,next) => {
     .status(200)
     .send({
       message : "Post Fetched Successfully" ,
+      totalPost : User_Post.length,
        data : User_Post
       })
 
