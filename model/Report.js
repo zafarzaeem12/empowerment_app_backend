@@ -16,10 +16,18 @@ const ReportSchema = new mongoose.Schema({
         type: Boolean,
         default : false
     },
+    is_Comment_reported_status :{
+        type: Boolean,
+        default : false
+    },
     post_status :{
         type: Boolean,
         default : false
     },
+    reported_comments: {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'Comment'
+    }
 },
     { timestamps: true }
 )

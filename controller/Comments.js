@@ -24,39 +24,58 @@ const Create_New_Comments  = async (req,res,next) => {
 }
 
 const Get_All_Comments_on_Post  = async (req,res,next) => {
+  const login_user = req.id
   const post_id = req.query.Types_id
   const id = new mongoose.Types.ObjectId(post_id);
+  const ids = new mongoose.Types.ObjectId(login_user);
 
     try{
-     const data = [
-        {
-          '$match': {
-            'Types_id': id
+
+     
+
+     const data =  [
+      {
+        '$lookup': {
+          'from': 'users', 
+          'localField': 'User_id', 
+          'foreignField': '_id', 
+          'as': 'Comment_User'
+        }
+      }, {
+        '$unwind': {
+          'path': '$Comment_User'
+        }
+      }, {
+        '$lookup': {
+          'from': 'reports', 
+          'localField': '_id', 
+          'foreignField': 'reported_comments', 
+          'as': 'reported_comments'
+        }
+      }, {
+        '$match': {
+          '$expr': {
+            '$and': [
+              {
+                '$not': {
+                  '$in': [
+                    ids, '$reported_comments.reported_User_id'
+                  ]
+                }
+              }
+            ]
           }
-        }, {
-          '$lookup': {
-            'from': 'users', 
-            'localField': 'User_id', 
-            'foreignField': '_id', 
-            'as': 'Comment_User'
-          }
-        }, {
-          '$unwind': {
-            'path': '$Comment_User'
-          }
-        }, {
-          '$unset': [
-            'updatedAt', '__v', 'User_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
-          ]
-        }, {
-          '$sort': {
-            'createdAt': -1
-          }
-        }, 
-        // {
-        //   '$count': 'Total_Comments_on_Post'
-        // }
-      ]
+        }
+      }, {
+        '$unset': [
+          'updatedAt', '__v', 'User_id', 'status', 'Comment_User.email', 'Comment_User.password', 'Comment_User.gender', 'Comment_User.verification_code', 'Comment_User.user_is_forgot', 'Comment_User.user_authentication', 'Comment_User.user_device_token', 'Comment_User.user_device_type', 'Comment_User.is_notification', 'Comment_User.createdAt', 'Comment_User.updatedAt', 'Comment_User.__v', 'Comment_User.address', 'Comment_User.city', 'Comment_User.dob', 'Comment_User.state', 'Comment_User.role', 'Comment_User.is_verified', 'Comment_User.user_is_profile_complete', 'Comment_User.is_Blocked', 'Comment_User.is_profile_deleted'
+        ]
+      }, {
+        '$sort': {
+          'createdAt': -1
+        }
+      }
+    ]
         const comment_data = await Comments.aggregate(data);
         res.status(200).send({
             total : comment_data.length,
