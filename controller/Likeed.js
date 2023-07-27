@@ -1,5 +1,3 @@
-const Preferences = require("../model/Preferences");
-const Users = require("../model/Users");
 const Like = require("../model/Likeed");
 var mongoose = require('mongoose');
 const Create_Likes = async (req, res, next) => {
