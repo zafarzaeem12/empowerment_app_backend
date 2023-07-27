@@ -25,8 +25,6 @@ const Create_New_Comments  = async (req,res,next) => {
 
 const Get_All_Comments_on_Post  = async (req,res,next) => {
   const login_user = req.id
-  const post_id = req.query.Types_id
-  const id = new mongoose.Types.ObjectId(post_id);
   const ids = new mongoose.Types.ObjectId(login_user);
 
     try{
