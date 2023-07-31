@@ -41,8 +41,9 @@ const create_Goals = async (req, res, next) => {
 };
 
 const Get_all_Goals = async (req,res) => {
+    const User_id = req.id;
     try{
-        const all_Goals = await Goals.find();
+        const all_Goals = await Goals.find( {User_id : User_id});
         res
         .status(200)
         .send({ 
