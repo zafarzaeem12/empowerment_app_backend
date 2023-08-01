@@ -4,13 +4,17 @@ const File = require('../middleware/ImagesandVideosData');
 const { 
     create_Goals,
     Get_all_Goals,
-    Get_specfic_goals
+    Get_specfic_goals,
+    Get_edited_goals,
+    Get_deleted_goals
 } = require('../controller/Goals')
 
  router.post('/create_goals' ,auth , File.user , create_Goals );
- router.get('/get_all_goals' , auth , Get_all_Goals)
- router.get('/goal_by_id' , auth , Get_specfic_goals)
-// router.get('/get_comments' ,auth ,File.user , Get_All_Comments_on_Post );
+ router.get('/get_all_user_goals' , auth , File.user , Get_all_Goals);
+ router.get('/goal_by_id/:id' , auth , Get_specfic_goals);
+ router.put('/edit_goal/:id' , auth , File.user , Get_edited_goals);
+ router.delete('/delete_id/:id' , auth , Get_deleted_goals);
+
 
 
 module.exports = router
