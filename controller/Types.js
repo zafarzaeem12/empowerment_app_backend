@@ -53,137 +53,119 @@ const Create_Types = async (req, res, next) => {
 const Get_Post = async (req, res, next) => {
   const id = new mongoose.Types.ObjectId(req.id);
   try {
-    const data = [
-      {
-        $lookup: {
-          from: "preferences",
-          localField: "category.Preferences",
-          foreignField: "_id",
-          as: "Category",
-        },
-      },
-      {
-        $addFields: {
-          Category_name: {
-            $map: {
-              input: "$Category",
-              as: "categoryItem",
-              in: "$$categoryItem.name",
-            },
-          },
-        },
-      },
-      {
-        $unset: ["Category", "category"],
-      },
-      {
-        $lookup: {
-          from: "comments",
-          localField: "_id",
-          foreignField: "Types_id",
-          as: "User_Comments",
-        },
-      },
-      {
-        $addFields: {
-          total_Comments: {
-            $size: "$User_Comments",
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "likeds",
-          localField: "_id",
-          foreignField: "Types_id",
-          as: "User_Liked",
-        },
-      },
-      {
-        $addFields: {
-          total_Likes: {
-            $size: "$User_Liked",
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "reports",
-          localField: "_id",
-          foreignField: "reported_on_Types_id",
-          as: "Reported_User",
-        },
-      },
-      {
-        $addFields: {
-          On_reported_Post: "$Reported_User",
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "On_reported_Post.reported_User_id",
-          foreignField: "_id",
-          as: "Details_for_Reported_User",
-        },
-      },
-      {
-        $match: {
-          $expr: {
-            $and: [
-              {
-                $not: {
-                  $in: [id, "$On_reported_Post.reported_User_id"],
-                },
-              },
-            ],
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "User_id",
-          foreignField: "_id",
-          as: "User_Data",
-        },
-      },
-      {
-        $unwind: {
-          path: "$User_Data",
-        },
-      },
-      {
-        $unset: [
-          "User_Data.email",
-          "User_Data.password",
-          "User_Data.verification_code",
-          "User_Data.is_verified",
-          "User_Data.user_is_profile_complete",
-          "User_Data.user_is_forgot",
-          "User_Data.user_authentication",
-          "User_Data.user_device_token",
-          "User_Data.user_device_type",
-          "User_Data.is_profile_deleted",
-          "User_Data.is_notification",
-          "User_Data.is_Blocked",
-          "User_Data.createdAt",
-          "User_Data.updatedAt",
-          "User_Data.__v",
-          "User_Data.address",
-          "User_Data.city",
-          "User_Data.dob",
-          "User_Data.state",
-          "User_Data.role",
-          "User_Data.gender",
-        ],
-      },
-      {
-        $sort: {
-          createdAt: -1,
-        },
-      },
-    ];
+  const data = [
+    {
+      '$lookup': {
+        'from': 'preferences', 
+        'localField': 'category.Preferences', 
+        'foreignField': '_id', 
+        'as': 'Category'
+      }
+    }, {
+      '$addFields': {
+        'Category_name': {
+          '$map': {
+            'input': '$Category', 
+            'as': 'categoryItem', 
+            'in': '$$categoryItem.name'
+          }
+        }
+      }
+    }, {
+      '$unset': [
+        'Category', 'category'
+      ]
+    }, {
+      '$lookup': {
+        'from': 'comments', 
+        'localField': '_id', 
+        'foreignField': 'Types_id', 
+        'as': 'User_Comments'
+      }
+    }, {
+      '$addFields': {
+        'total_Comments': {
+          '$size': '$User_Comments'
+        }
+      }
+    }, {
+      '$lookup': {
+        'from': 'likeds', 
+        'localField': '_id', 
+        'foreignField': 'Types_id', 
+        'as': 'User_Liked'
+      }
+    }, {
+      '$addFields': {
+        'total_Likes': {
+          '$size': '$User_Liked'
+        }
+      }
+    }, {
+      '$lookup': {
+        'from': 'reports', 
+        'localField': '_id', 
+        'foreignField': 'reported_on_Types_id', 
+        'as': 'Reported_User'
+      }
+    }, {
+      '$lookup': {
+        'from': 'saveposts', 
+        'localField': '_id', 
+        'foreignField': 'save_on_Types_id', 
+        'as': 'savePost'
+      }
+    }, {
+      '$addFields': {
+        'On_reported_Post': '$Reported_User', 
+        'On_saved_Post': '$savePost'
+      }
+    }, {
+      '$lookup': {
+        'from': 'users', 
+        'localField': 'On_reported_Post.reported_User_id', 
+        'foreignField': '_id', 
+        'as': 'Details_for_Reported_User'
+      }
+    }, {
+      '$match': {
+        '$expr': {
+          '$and': [
+            {
+              '$not': {
+                '$in': [
+                  id, '$On_reported_Post.reported_User_id'
+                ]
+              }
+            }, {
+              '$in': [
+                true, '$On_saved_Post.is_saved_status'
+              ]
+            }
+          ]
+        }
+      }
+    }, {
+      '$lookup': {
+        'from': 'users', 
+        'localField': 'User_id', 
+        'foreignField': '_id', 
+        'as': 'User_Data'
+      }
+    }, {
+      '$unwind': {
+        'path': '$User_Data'
+      }
+    }, {
+      '$unset': [
+        'User_Data.email', 'User_Data.password', 'User_Data.verification_code', 'User_Data.is_verified', 'User_Data.user_is_profile_complete', 'User_Data.user_is_forgot', 'User_Data.user_authentication', 'User_Data.user_device_token', 'User_Data.user_device_type', 'User_Data.is_profile_deleted', 'User_Data.is_notification', 'User_Data.is_Blocked', 'User_Data.createdAt', 'User_Data.updatedAt', 'User_Data.__v', 'User_Data.address', 'User_Data.city', 'User_Data.dob', 'User_Data.state', 'User_Data.role', 'User_Data.gender'
+      ]
+    }, {
+      '$sort': {
+        'createdAt': -1
+      }
+    }
+  ]
     const User_Post = await Types.aggregate(data);
     res.status(200).send({
       message: "Post Fetched Successfully",
