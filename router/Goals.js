@@ -6,7 +6,8 @@ const {
     Get_all_Goals,
     Get_specfic_goals,
     Get_edited_goals,
-    Get_deleted_goals
+    Get_deleted_goals,
+    Goal_Notification
 } = require('../controller/Goals')
 
  router.post('/create_goals' ,auth , File.user , create_Goals );
@@ -14,6 +15,8 @@ const {
  router.get('/goal_by_id/:id' , auth , Get_specfic_goals);
  router.put('/edit_goal/:id' , auth , File.user , Get_edited_goals);
  router.delete('/delete_id/:id' , auth , Get_deleted_goals);
+
+ router.get('/notify' , Goal_Notification )  
 
 
 

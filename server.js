@@ -13,6 +13,7 @@ const LikedRouter = require('./router/Likeed')
 const CommentsRouter = require('./router/Comments')
 const ReportsRouter = require('./router/Report')
 const GoalsRouter = require('./router/Goals')
+const Save_Types = require('./router/Save_Types')
 // app routes end here
 
 app.use(express.static(path.join(__dirname + '/public')));
@@ -27,6 +28,7 @@ app.use("/LikedAPI/", LikedRouter);
 app.use("/CommentsAPI/", CommentsRouter);
 app.use("/ReportAPI/", ReportsRouter);
 app.use("/GoalAPI/", GoalsRouter);
+app.use("/Save_TypesAPI/", Save_Types);
 // routes end here
 
 dotenv.config();
