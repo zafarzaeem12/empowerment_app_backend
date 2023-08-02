@@ -32,11 +32,11 @@ const push_notifications = (notification_obj) => {
       }
     };
 
-    
+    console.log('message',message)
     
     fcm.send(message, function (err, response) {
       if (err) {
-        console.log("Something has gone wrong!" , err.message);
+        console.log("Something has gone wrong!" , err);
       } else {
         console.log("Successfully sent with response: ", response);
       }

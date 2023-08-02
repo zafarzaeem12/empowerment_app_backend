@@ -19,7 +19,7 @@ const GoalSchema = new mongoose.Schema({
         default: 'Hourly'
     },
     end_Date:{
-        type: Date
+        type: String
     },
     set_Time:{
         type : Object
@@ -28,6 +28,9 @@ const GoalSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref : 'User'
     },
+    notification_time:{
+        type: String
+    }
   
 },
     { timestamps: true }
