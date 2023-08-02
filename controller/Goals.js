@@ -147,8 +147,14 @@ const Goal_Notification = async (req,res,next) => {
 
  return userNotifiy.filter((data) => {
     if(currentTime <= new Date(data.end_Date) && data.is_Checked === true){
+      const startOfWeek = moment(currentTime).startOf('week');
+      const endOfWeek = moment(data.end_Date).endOf('week');
+      const loginDate = moment(currentTime);
+      const weekly_Check  = loginDate.isBetween(startOfWeek , endOfWeek);
+      
+      
 
-      if(data.is_Set_Reminder === 'Hourly'){
+      if(moment(currentTime).format('HH') <=  moment(data.end_Date).format('HH') && data.is_Set_Reminder === 'Hourly'){
         console.log("==============> , Hourly" , data.is_Set_Reminder)
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
@@ -162,7 +168,7 @@ const Goal_Notification = async (req,res,next) => {
           return push_notifications(notification_obj_receiver)
         }
       }
-      else if(data.is_Set_Reminder === 'Daily'){
+      else if(moment(currentTime).format('DD') <=  moment(data.end_Date).format('DD') &&  data.is_Set_Reminder === 'Daily'){
         console.log("==============> , Daily" , data.is_Set_Reminder)
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
@@ -172,9 +178,11 @@ const Goal_Notification = async (req,res,next) => {
           vibrate: 1,
           sound: 1,
         };
-        push_notifications(notification_obj_receiver)
+        if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
+          return push_notifications(notification_obj_receiver)
+        }
       }
-      else if(data.is_Set_Reminder === 'Weekly'){
+      else if(weekly_Check === true && data.is_Set_Reminder === 'Weekly'){
         console.log("==============> , Weekly" , data.is_Set_Reminder)
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
@@ -184,7 +192,9 @@ const Goal_Notification = async (req,res,next) => {
           vibrate: 1,
           sound: 1,
         };
-        push_notifications(notification_obj_receiver)
+        if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
+          return push_notifications(notification_obj_receiver)
+        }
       }
 
     }else{
@@ -203,7 +213,7 @@ const Goal_Notification = async (req,res,next) => {
 }
 
 
-const task = cron.schedule("* * * * *",( async() => {
+const task = cron.schedule("* * * * * *",( async() => {
   console.log("Goal_Notification()" , await Goal_Notification()) 
 }) ,  {
   scheduled: false, // This will prevent the immediate execution of the task
