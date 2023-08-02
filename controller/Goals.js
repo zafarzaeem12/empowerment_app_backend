@@ -137,7 +137,7 @@ const Get_deleted_goals = async (req, res, next) => {
 };
 
 const Goal_Notification = async (req,res,next) => {
-
+  const currentTime = new Date()
   const userNotifiy = await Goals
   .find()
   .populate({
@@ -146,10 +146,10 @@ const Goal_Notification = async (req,res,next) => {
   })
 
  return userNotifiy.filter((data) => {
-    if(new Date(data.createdAt) < new Date(data.end_Date)){
+    if(currentTime <= new Date(data.end_Date) && data.is_Checked === true){
 
       if(data.is_Set_Reminder === 'Hourly'){
-
+        console.log("==============> , Hourly" , data.is_Set_Reminder)
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
           title: data.title,
@@ -158,9 +158,12 @@ const Goal_Notification = async (req,res,next) => {
           vibrate: 1,
           sound: 1,
         };
-        push_notifications(notification_obj_receiver)
+        if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
+          return push_notifications(notification_obj_receiver)
+        }
       }
       else if(data.is_Set_Reminder === 'Daily'){
+        console.log("==============> , Daily" , data.is_Set_Reminder)
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
           title: data.title,
@@ -172,6 +175,7 @@ const Goal_Notification = async (req,res,next) => {
         push_notifications(notification_obj_receiver)
       }
       else if(data.is_Set_Reminder === 'Weekly'){
+        console.log("==============> , Weekly" , data.is_Set_Reminder)
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
           title: data.title,
@@ -199,17 +203,17 @@ const Goal_Notification = async (req,res,next) => {
 }
 
 
-// const task = cron.schedule("* * * * * *",( async() => {
-//   console.log("Goal_Notification()" , await Goal_Notification()) 
-// }) ,  {
-//   scheduled: false, // This will prevent the immediate execution of the task
-// });
+const task = cron.schedule("* * * * *",( async() => {
+  console.log("Goal_Notification()" , await Goal_Notification()) 
+}) ,  {
+  scheduled: false, // This will prevent the immediate execution of the task
+});
 
 // // Schedule the task to run after 1 hour
 // // const oneHourFromNow = new Date();
 // // oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
 // // task.setTime(oneHourFromNow);
-// task.start();
+task.start();
 
 module.exports = {
   create_Goals,

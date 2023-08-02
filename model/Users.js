@@ -70,7 +70,7 @@ const UserSchema = new mongoose.Schema({
     },
     user_device_token: {
         type: String,
-        required : true
+        default : null,
     },
     user_device_type: {
         type: String,
