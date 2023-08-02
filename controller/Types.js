@@ -53,7 +53,7 @@ const Create_Types = async (req, res, next) => {
 const Get_Post = async (req, res, next) => {
   const id = new mongoose.Types.ObjectId(req.id);
   try {
-  const data = [
+  const data =[
     {
       '$lookup': {
         'from': 'preferences', 
@@ -97,6 +97,25 @@ const Get_Post = async (req, res, next) => {
       }
     }, {
       '$addFields': {
+        'current_reaction': {
+          '$in': [
+            id, '$User_Liked.User_id'
+          ]
+        }, 
+        'reactions': {
+          '$filter': {
+            'input': '$User_Liked', 
+            'as': 'reactions', 
+            'cond': {
+              '$eq': [
+                '$$reactions.User_id', id
+              ]
+            }
+          }
+        }
+      }
+    }, {
+      '$addFields': {
         'total_Likes': {
           '$size': '$User_Liked'
         }
@@ -118,7 +137,22 @@ const Get_Post = async (req, res, next) => {
     }, {
       '$addFields': {
         'On_reported_Post': '$Reported_User', 
-        'On_saved_Post': '$savePost'
+        'is_post_saved': {
+          '$in': [
+            id, '$savePost.save_on_User_id'
+          ]
+        }, 
+        'saved_posts': {
+          '$filter': {
+            'input': '$savePost', 
+            'as': 'saved_posts', 
+            'cond': {
+              '$eq': [
+                '$$saved_posts.save_on_User_id', id
+              ]
+            }
+          }
+        }
       }
     }, {
       '$lookup': {
@@ -137,10 +171,6 @@ const Get_Post = async (req, res, next) => {
                   id, '$On_reported_Post.reported_User_id'
                 ]
               }
-            }, {
-              '$in': [
-                true, '$On_saved_Post.is_saved_status'
-              ]
             }
           ]
         }
@@ -158,7 +188,7 @@ const Get_Post = async (req, res, next) => {
       }
     }, {
       '$unset': [
-        'User_Data.email', 'User_Data.password', 'User_Data.verification_code', 'User_Data.is_verified', 'User_Data.user_is_profile_complete', 'User_Data.user_is_forgot', 'User_Data.user_authentication', 'User_Data.user_device_token', 'User_Data.user_device_type', 'User_Data.is_profile_deleted', 'User_Data.is_notification', 'User_Data.is_Blocked', 'User_Data.createdAt', 'User_Data.updatedAt', 'User_Data.__v', 'User_Data.address', 'User_Data.city', 'User_Data.dob', 'User_Data.state', 'User_Data.role', 'User_Data.gender'
+        'User_Data.email', 'User_Data.password', 'User_Data.verification_code', 'User_Data.is_verified', 'User_Data.user_is_profile_complete', 'User_Data.user_is_forgot', 'User_Data.user_authentication', 'User_Data.user_device_token', 'User_Data.user_device_type', 'User_Data.is_profile_deleted', 'User_Data.is_notification', 'User_Data.is_Blocked', 'User_Data.createdAt', 'User_Data.updatedAt', 'User_Data.__v', 'User_Data.address', 'User_Data.city', 'User_Data.dob', 'User_Data.state', 'User_Data.role', 'reactions._id', 'reactions.Types_id', 'reactions.User_id', 'reactions.status', 'reactions.createdAt', 'reactions.updatedAt', 'reactions.__v'
       ]
     }, {
       '$sort': {
