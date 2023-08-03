@@ -25,7 +25,7 @@ const  TypesSchema = new mongoose.Schema({
     },
     type:{
         type:String,
-        enum : ['Blog','Article'],
+        enum : ['Blog','Article','Video','Audio'],
         default: 'Article'
     },
     blog_image:{

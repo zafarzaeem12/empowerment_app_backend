@@ -5,17 +5,18 @@ const mongoose = require("mongoose");
 const Preferencess = require("../model/Preferences");
 const moment = require('moment')
 const Create_Types = async (req, res, next) => {
-  const userAvator = req?.files?.blog_image?.map((data) =>
-    data?.path?.replace(/\\/g, "/")
-  );
+  const userAvator = req?.files?.blog_image?.map((data) =>{
+   const {path , mimetype } = data;
+   return {  path , mimetype }
+
+  });
   const main_Types = req.body.type;
   try {
     const categoryIds = req.body.category.map((cat) => cat.trim());
-    console.log("categoryIds", categoryIds);
     const data = {
       type:
         main_Types.charAt(0).toUpperCase() + main_Types.slice(1).toLowerCase(),
-      blog_image: userAvator,
+      blog_image: userAvator[0].path?.replace(/\\/g, "/") ,
       User_id: req.body.User_id,
       category: categoryIds.map((data) => {
         return { Preferences: data };
@@ -26,25 +27,44 @@ const Create_Types = async (req, res, next) => {
     };
 
     if (data.type === "Article") {
-      console.log(data);
+    
       delete data.blog_image;
       const Article = await Types.create(data);
-      res.status(200).send({
+     return res.status(200).send({
         message: `${Article.title} Article created Successfully `,
         data: Article,
       });
     }
-
-    if (data.type === "Blog") {
-      console.log("data ===========>", data);
+   
+    if (data.type === "Blog" && userAvator[0].mimetype.startsWith("audio")) {
       delete data.long_description;
       const Blogging = await Types.create(data);
 
-      res.status(200).send({
-        message: `${Blogging.title} Blog created Successfully `,
+      return  res.status(200).send({
+        message: `${Blogging.title} Audio blog created Successfully `,
         data: Blogging,
       });
     }
+
+    if (data.type === "Blog" && userAvator[0].mimetype.startsWith("image")) {
+      delete data.long_description;
+      const Blogging = await Types.create(data);
+
+      return  res.status(200).send({
+        message: `${Blogging.title} Image blog created Successfully `,
+        data: Blogging,
+      });
+    }
+
+    if (data.type === "Blog" && userAvator[0].mimetype.startsWith("video")) {
+      delete data.long_description;
+      const Blogging = await Types.create(data);
+
+      return  res.status(200).send({
+        message: `${Blogging.title} Video blog created Successfully `,
+        data: Blogging,
+      });
+    }    
   } catch (err) {
     res.status(404).send({ message: "no Content found" });
   }

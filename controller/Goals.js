@@ -213,12 +213,12 @@ const Goal_Notification = async (req,res,next) => {
 }
 
 
-const task = cron.schedule("* * * * * *",( async() => {
-  console.log("Goal_Notification()" , await Goal_Notification()) 
-}) ,  {
-  scheduled: false, // This will prevent the immediate execution of the task
-});
-task.start();
+// const task = cron.schedule("* * * * * *",( async() => {
+//   console.log("Goal_Notification()" , await Goal_Notification()) 
+// }) ,  {
+//   scheduled: false, // This will prevent the immediate execution of the task
+// });
+// task.start();
 
 // // Schedule the task to run after 1 hour
 // // const oneHourFromNow = new Date();
