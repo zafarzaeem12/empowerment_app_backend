@@ -243,7 +243,7 @@ const User_Forget_Password = async (req, res, next) => {
       });
       next();
     } else if (userfind?.email) {
-      const num = Math.floor(Math.random() * 9000) + 1000;
+      const num = Math.floor(Math.random() * 900000) + 100000;
       const nums = await User.findOneAndUpdate(
         userfind?.email && userfind?._id,
         {
