@@ -3,7 +3,7 @@ const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 
-const Register_New_User = async (req, res , next) => {
+const Register_New_User = async (req, res, next) => {
   const typed_Email = req.body.email;
   const typed_phone_number = req.body.phone_number;
 
@@ -43,59 +43,54 @@ const Register_New_User = async (req, res , next) => {
       },
       { new: true }
     );
-    const {password , email , verification_code , ...othersfields  } = nums
+    const { password, email, verification_code, ...othersfields } = nums;
     return res.status(201).send({
       message: "OTP sent for New user confirmation",
       status: 201,
-      data: { verification_code , email },
+      data: { verification_code, email },
     });
   } catch (err) {
     res.status(404).send({
-      message:"OTP not created",
+      message: "OTP not created",
       status: 404,
     });
   }
 };
 
-const Complete_Profile = async (req,res,next) => {
+const Complete_Profile = async (req, res, next) => {
   const email = req.query.email;
-try{
-  const find_email = await User.findOne({ email : email  });
-  const userAvator = req?.file?.path?.replace(/\\/g, "/")
-  const db = moment(req.body.dob)
-  const complete_profile = await User.updateOne(
-    {email : find_email.email},
-    {
-      $set:{
-        user_image : userAvator,
-        name : req.body.name,
-        dob : db.format('YYYY-MM-DD'),
-        gender : req.body.gender,
-        address : req.body.address,
-        state : req.body.state,
-        city : req.body.city,
-        role : req.body.role,
-        user_is_profile_complete : true,
-        is_verified : true
+  try {
+    const find_email = await User.findOne({ email: email });
+    const userAvator = req?.file?.path?.replace(/\\/g, "/");
+    const db = moment(req.body.dob);
+    const complete_profile = await User.updateOne(
+      { email: find_email.email },
+      {
+        $set: {
+          user_image: userAvator,
+          name: req.body.name,
+          dob: db.format("YYYY-MM-DD"),
+          gender: req.body.gender,
+          address: req.body.address,
+          state: req.body.state,
+          city: req.body.city,
+          role: req.body.role,
+          user_is_profile_complete: true,
+          is_verified: true,
+        },
+      },
+      { new: true }
+    );
 
-      }
-    },
-    { new : true}
-    )
-
-  res
-  .status(200)
-  .send({
-     message : "Profile Completed Successfully" ,
-    })
-}catch(err){
-  res
-  .status(404)
-  .send({
-     message : "Profile Not Completed",
-    })
-}
-}
+    res.status(200).send({
+      message: "Profile Completed Successfully",
+    });
+  } catch (err) {
+    res.status(404).send({
+      message: "Profile Not Completed",
+    });
+  }
+};
 
 const LoginRegisteredUser = async (req, res, next) => {
   try {
@@ -125,32 +120,32 @@ const LoginRegisteredUser = async (req, res, next) => {
         const token = jwt.sign(
           {
             id: LoginUser._id,
-            role: LoginUser.role
+            role: LoginUser.role,
           },
           process.env.SECRET_KEY,
           { expiresIn }
         );
-      
+
         const save_token = await User.findByIdAndUpdate(
           { _id: LoginUser?._id?.toString() },
           { $set: { user_authentication: `${token}` } },
           { new: true }
         );
         const { user_authentication } = save_token;
-      
+
         res.send({
           message: "Login Successful",
           status: 200,
-          data: { user_authentication }
+          data: { user_authentication },
         });
       } else {
         res.send({
           message: "Invalid role",
-          status: 403
+          status: 403,
         });
       }
-  }
-} catch (err) {
+    }
+  } catch (err) {
     res.send({
       message: "Login Failed",
       status: 404,
@@ -394,8 +389,8 @@ const Delete_and_Blocked_Existing_User_Temporaray = async (req, res, next) => {
 const Turn_on_or_off_Notifications = async (req, res, next) => {
   const email = req.query.email;
   const notification = req.query.is_notification;
-  try{
-    const Notify = await User.findOne({ email : email });
+  try {
+    const Notify = await User.findOne({ email: email });
 
     const reported_User = await User.findByIdAndUpdate(
       { _id: Notify._id },
@@ -409,8 +404,7 @@ const Turn_on_or_off_Notifications = async (req, res, next) => {
           : `this user ${reported_User?.name} has been Un_Subscribed`,
       status: 201,
     });
-
-  }catch(err){
+  } catch (err) {
     res.send({
       message: "Status Not Chnaged",
       status: 404,
@@ -418,10 +412,10 @@ const Turn_on_or_off_Notifications = async (req, res, next) => {
   }
 };
 
-const Logout_Existing_User = async (req,res,next) => {
-  const ID = req.id
-  try{
-    const Empty_token = await User.findOne({ _id : ID });
+const Logout_Existing_User = async (req, res, next) => {
+  const ID = req.id;
+  try {
+    const Empty_token = await User.findOne({ _id: ID });
     const reported_User = await User.findByIdAndUpdate(
       { _id: Empty_token._id },
       { $set: { user_authentication: "" } },
@@ -429,18 +423,129 @@ const Logout_Existing_User = async (req,res,next) => {
     );
 
     res.send({
-      message : `${reported_User?.name} Logout Successfully`,
-      status : 204,
-
-    })
-
-  }catch(err){
+      message: `${reported_User?.name} Logout Successfully`,
+      status: 204,
+    });
+  } catch (err) {
     res.send({
       message: "Status Not Chnaged",
       status: 404,
     });
   }
-}
+};
+
+const Register_With_Social_Login = async (req, res, next) => {
+  try {
+    const Data = {
+      email: req.body.email,
+      phone_number: req.body.phone_number,
+      user_social_token: req.body.user_social_token,
+      user_social_type: req.body.user_social_type,
+      user_device_token: req.body.user_device_token,
+      user_device_type: req.body.user_device_type,
+    };
+    if (Data.user_social_type === "Google") {
+      const socialUser = await User.create(Data);
+      const expiresIn = socialUser.role === "User" ? "1h" : "23h";
+      const token = jwt.sign(
+        {
+          id: socialUser._id,
+          role: socialUser.role,
+          user_social_token: socialUser.user_social_token,
+          user_social_type: socialUser.user_social_type,
+          user_device_type: socialUser.user_device_type,
+          user_device_token: socialUser.user_device_token,
+        },
+        process.env.SECRET_KEY,
+        { expiresIn }
+      );
+
+      const socail = await User.updateOne(
+        { _id: socialUser._id },
+        { $set: { user_authentication: token, is_verified: true } },
+        { new: true }
+      );
+
+      const { acknowledged, modifiedCount } = socail;
+      if (acknowledged === true && modifiedCount === 1) {
+        const token = await User.findOne({ _id: socialUser._id });
+        const { user_authentication, ...others } = token;
+        return res.status(200).send({
+          message: `Social Login Successfully`,
+          data: user_authentication,
+        });
+      }
+    }
+
+    if (Data.user_social_type === "Apple") {
+      const socialUser = await User.create(Data);
+      const expiresIn = socialUser.role === "User" ? "1h" : "23h";
+      const token = jwt.sign(
+        {
+          id: socialUser._id,
+          role: socialUser.role,
+          user_social_token: socialUser.user_social_token,
+          user_social_type: socialUser.user_social_type,
+          user_device_type: socialUser.user_device_type,
+          user_device_token: socialUser.user_device_token,
+        },
+        process.env.SECRET_KEY,
+        { expiresIn }
+      );
+
+      const socail = await User.updateOne(
+        { _id: socialUser._id },
+        { $set: { user_authentication: token, is_verified: true } },
+        { new: true }
+      );
+
+      const { acknowledged, modifiedCount } = socail;
+      if (acknowledged === true && modifiedCount === 1) {
+        const token = await User.findOne({ _id: socialUser._id });
+        const { user_authentication, ...others } = token;
+        return res.status(200).send({
+          message: `Social Login Successfully`,
+          data: user_authentication,
+        });
+      }
+    }
+    
+    if (Data.user_social_type === "Phone") {
+      const socialUser = await User.create(Data);
+      const expiresIn = socialUser.role === "User" ? "1h" : "23h";
+      const token = jwt.sign(
+        {
+          id: socialUser._id,
+          role: socialUser.role,
+          user_social_token: socialUser.user_social_token,
+          user_social_type: socialUser.user_social_type,
+          user_device_type: socialUser.user_device_type,
+          user_device_token: socialUser.user_device_token,
+        },
+        process.env.SECRET_KEY,
+        { expiresIn }
+      );
+
+      const socail = await User.updateOne(
+        { _id: socialUser._id },
+        { $set: { user_authentication: token, is_verified: true } },
+        { new: true }
+      );
+
+      const { acknowledged, modifiedCount } = socail;
+      if (acknowledged === true && modifiedCount === 1) {
+        const token = await User.findOne({ _id: socialUser._id });
+        const { user_authentication, ...others } = token;
+        return res.status(200).send({
+          message: `Social Login Successfully`,
+          data: user_authentication,
+        });
+      }
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
   Register_New_User,
@@ -454,5 +559,6 @@ module.exports = {
   User_Reset_Password,
   Turn_on_or_off_Notifications,
   Logout_Existing_User,
-  Complete_Profile
+  Complete_Profile,
+  Register_With_Social_Login,
 };

@@ -9,8 +9,8 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        unique: true,
-        required: true
+        // unique: true,
+        // required: true
     },
     user_image: {
         type: String,
@@ -70,7 +70,7 @@ const UserSchema = new mongoose.Schema({
     },
     user_device_token: {
         type: String,
-        default : null,
+        default : "",
     },
     user_device_type: {
         type: String,
@@ -89,6 +89,15 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default : false
     },
+    user_social_token:{
+        type : String,
+        default : '12345'
+    },
+    user_social_type:{
+        type:String,
+        enum : ['Phone','Google','Apple','none'],
+        default: 'none'
+    }
 },
     { timestamps: true }
 )
