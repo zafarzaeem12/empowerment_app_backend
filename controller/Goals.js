@@ -1,4 +1,5 @@
 const Goals = require("../model/Goals");
+const Notification = require('../model/Notification')
 const moment = require("moment");
 var mongoose = require("mongoose");
 const cron = require('node-cron');
@@ -151,7 +152,7 @@ const Goal_Notification = async (req,res,next) => {
     select: '-user_authentication -password -user_is_forgot'
   })
 
- return userNotifiy.filter((data) => {
+ return userNotifiy.filter(async (data) => {
   
     if(data.is_Checked === true){
       if(data.notification_time <= data.end_Date && data.is_Set_Reminder === 'Hourly'){
@@ -165,6 +166,14 @@ const Goal_Notification = async (req,res,next) => {
           sound: 1,
         };
         if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
+          const Data = {
+            User_id :data.User_id._id,
+            title  :notification_obj_receiver.title,
+            details : notification_obj_receiver.body
+          }
+
+            await Notification.create(Data)
+
           return push_notifications(notification_obj_receiver)
         }
       }
@@ -177,8 +186,16 @@ const Goal_Notification = async (req,res,next) => {
           notification_type: 'msg_notify',
           vibrate: 1,
           sound: 1,
+          other: data
         };
         if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
+          const Data = {
+            User_id :data.User_id._id,
+            title  :notification_obj_receiver.title,
+            details : notification_obj_receiver.body
+          }
+
+            await Notification.create(Data)
           return push_notifications(notification_obj_receiver)
         }
       }
@@ -193,6 +210,13 @@ const Goal_Notification = async (req,res,next) => {
           sound: 1,
         };
         if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
+          const Data = {
+            User_id :data.User_id._id,
+            title  :notification_obj_receiver.title,
+            details : notification_obj_receiver.body
+          }
+
+            await Notification.create(Data)
           return push_notifications(notification_obj_receiver)
         }
       }
