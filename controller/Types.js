@@ -72,8 +72,13 @@ const Create_Types = async (req, res, next) => {
 
 const Get_Post = async (req, res, next) => {
   const id = new mongoose.Types.ObjectId(req.id);
+  const title = req.query.title;
+  const type = req.query.type;
+  const Preferences = req.query.Preferences;
+  const createdAt =   req.query.createdAt;
   try {
-  const data =[
+  const data =
+  [
     {
       '$lookup': {
         'from': 'preferences', 
@@ -89,9 +94,55 @@ const Get_Post = async (req, res, next) => {
             'as': 'categoryItem', 
             'in': '$$categoryItem.name'
           }
-        }
+        },
+        'by_title': {
+          '$regexMatch': {
+            'input': "$title",
+            'regex':  new RegExp(title),
+            'options': "i",
+          },
+        },
+        'by_post_type': {
+          '$regexMatch': {
+            'input': "$type",
+            'regex': new RegExp(type),
+             'options': "i",
+          },
+        },
+        'by_post_preference': {
+          '$map': {
+            'input': "$Category",
+            'as': "category",
+            'in': {
+              '$cond': {
+                'if': {
+                  '$regexMatch': {
+                    'input': "$$category.name",
+                    'regex': new RegExp(Preferences),
+                     'options': "i",
+                  },
+                },
+                'then': "$$category.name",
+                'else': "$$REMOVE",
+              },
+            },
+          },
+        },
       }
-    }, {
+    }, 
+    {
+      '$addFields': {
+        'by_post_preference': {
+          '$filter': {
+            'input': "$by_post_preference",
+            'cond': {
+              '$ne': ["$$this", null],
+            },
+          },
+        },
+      },
+    },
+    {
       '$unset': [
         'Category', 'category'
       ]
@@ -183,6 +234,14 @@ const Get_Post = async (req, res, next) => {
       }
     }, {
       '$match': {
+        'by_title': true,
+        'by_post_type' : true,
+        'by_post_preference': {
+          '$ne': [],
+        },
+        'createdAt': {
+          '$gte': new Date(createdAt),
+        },
         '$expr': {
           '$and': [
             {
@@ -229,7 +288,7 @@ const Get_Post = async (req, res, next) => {
 
 const Get_Filter_Post = async (req, res, next) => {
   
- 
+  
   const title = req.query.title;
   const type = req.query.type;
   const createdAt =   req.query.createdAt
@@ -250,35 +309,35 @@ const Get_Filter_Post = async (req, res, next) => {
       },
       {
         $addFields: {
-          by_title: {
-            $regexMatch: {
-              input: "$title",
-              regex:  new RegExp(title),
-              options: "i",
+          'by_title': {
+            '$regexMatch': {
+              'input': "$title",
+              'regex':  new RegExp(title),
+              'options': "i",
             },
           },
-          by_post_type: {
-            $regexMatch: {
-              input: "$type",
-              regex: new RegExp(type),
-               options: "i",
+          'by_post_type': {
+            '$regexMatch': {
+              'input': "$type",
+              'regex': new RegExp(type),
+               'options': "i",
             },
           },
-          by_post_preference: {
-            $map: {
-              input: "$Selected_category",
-              as: "category",
-              in: {
-                $cond: {
-                  if: {
-                    $regexMatch: {
-                      input: "$$category.name",
-                      regex: new RegExp(Preferences),
-                       options: "i",
+          'by_post_preference': {
+            '$map': {
+              'input': "$Selected_category",
+              'as': "category",
+              'in': {
+                '$cond': {
+                  'if': {
+                    '$regexMatch': {
+                      'input': "$$category.name",
+                      'regex': new RegExp(Preferences),
+                       'options': "i",
                     },
                   },
-                  then: "$$category.name",
-                  else: "$$REMOVE",
+                  'then': "$$category.name",
+                  'else': "$$REMOVE",
                 },
               },
             },
@@ -286,12 +345,12 @@ const Get_Filter_Post = async (req, res, next) => {
         },
       },
       {
-        $addFields: {
-          by_post_preference: {
-            $filter: {
-              input: "$by_post_preference",
-              cond: {
-                $ne: ["$$this", null],
+        '$addFields': {
+          'by_post_preference': {
+            '$filter': {
+              'input': "$by_post_preference",
+              'cond': {
+                '$ne': ["$$this", null],
               },
             },
           },
