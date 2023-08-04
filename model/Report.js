@@ -24,7 +24,7 @@ const ReportSchema = new mongoose.Schema({
         type: Boolean,
         default : false
     },
-    reported_comments: {
+    reported_comments_id: {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Comment'
     }

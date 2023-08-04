@@ -9,6 +9,8 @@ const create_Goals = async (req, res, next) => {
   try {
     if (req.body.is_Checked) {
       const currentTime = new Date();
+      const time = moment(req.body.set_Time, "HH:mm").format("hh:mm A")
+      
       const Data = {
         title: req.body.title,
         details: req.body.details,
@@ -16,18 +18,15 @@ const create_Goals = async (req, res, next) => {
         notification_time : req.body.is_Set_Reminder === "Hourly" ?
           moment(Date.now()).add(1, 'h').format('YYYY-MM-DDThh:mm A') :  
           req.body.is_Set_Reminder === "Daily" ? 
-          moment(Date.now()).add(1, 'd').format('YYYY-MM-DD') : 
+          moment(Date.now()).add(1, 'd').format('YYYY-MM-DD') + 'T' + time: 
           req.body.is_Set_Reminder === "Weekly" ?
-          moment(Date.now()).add(1, 'w').format('YYYY-MM-DD') : null,
+          moment(Date.now()).add(1, 'w').format('YYYY-MM-DD') + 'T' + time : null,
         User_id: req.id,
         is_Set_Reminder: req.body.is_Set_Reminder,
-        end_Date: moment(req.body.end_Date).format('YYYY-MM-DDThh:mm A'),
-        set_Time: {
-          date: currentTime,
-          offset: currentTime.getTimezoneOffset(),
-        },
-      };
-
+        end_Date:   moment(req.body.end_Date).format('YYYY-MM-DD'),
+        set_Time: req.body.is_Set_Reminder === "Hourly" ? moment(currentTime).format('YYYY-MM-DDThh:mm A').split('T').pop() : time
+      };  
+      
       const Goal = await Goals.create(Data);
       return res.status(200).send({
         message: ` ${Goal.title} created successfully`,
@@ -155,30 +154,41 @@ const Goal_Notification = async (req,res,next) => {
  return userNotifiy.filter(async (data) => {
   
     if(data.is_Checked === true){
-      if(data.notification_time <= data.end_Date && data.is_Set_Reminder === 'Hourly'){
-        console.log("==============> , Hourly" , data.is_Set_Reminder , data.notification_time)
-        const notification_obj_receiver = {
-          to: data.User_id.user_device_token,
-          title: data.title,
-          body: data.details,
-          notification_type: 'msg_notify',
-          vibrate: 1,
-          sound: 1,
-        };
+      const c_time = data.notification_time.split('T').pop()
+      const c_date = data.notification_time.split('T').slice(0,1).pop()
+      const corr_time = new Date()
+      const notification_time = moment(corr_time).format('YYYY-MM-DDThh:mm A').split('T').pop()
+      const notification_date  = moment(corr_time).format('YYYY-MM-DDThh:mm A').split('T').slice(0,1).pop()
+    
+      console.log(c_time , notification_time)
+
+      console.log(c_time , notification_time ,"+", c_time  <= notification_time)
+      if( c_time  >= notification_time){
+        if(c_date <=  data.end_Date &&  data.is_Set_Reminder === 'Hourly') {
+          console.log("==============> , Hourly")
+          const notification_obj_receiver = {
+            to: data.User_id.user_device_token,
+            title: data.title,
+            body: data.details,
+            notification_type: 'msg_notify',
+            vibrate: 1,
+            sound: 1,
+        }
         if(data.User_id.is_notification === true && data.User_id.user_device_token != null){
           const Data = {
             User_id :data.User_id._id,
             title  :notification_obj_receiver.title,
             details : notification_obj_receiver.body
           }
-
+       
             await Notification.create(Data)
 
           return push_notifications(notification_obj_receiver)
+        };
         }
       }
       else if(data.notification_time <=  data.end_Date &&  data.is_Set_Reminder === 'Daily'){
-        console.log("==============> , Daily" , data.is_Set_Reminder , data.notification_time)
+        console.log("==============> , Daily")
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
           title: data.title,
@@ -194,13 +204,13 @@ const Goal_Notification = async (req,res,next) => {
             title  :notification_obj_receiver.title,
             details : notification_obj_receiver.body
           }
-
+          console.log(Data)
             await Notification.create(Data)
           return push_notifications(notification_obj_receiver)
         }
       }
       else if(data.notification_time <=  data.end_Date && data.is_Set_Reminder === 'Weekly'){
-        console.log("==============> , Weekly" , data.is_Set_Reminder , data.notification_time)
+        console.log("==============> , Weekly")
         const notification_obj_receiver = {
           to: data.User_id.user_device_token,
           title: data.title,
@@ -215,7 +225,7 @@ const Goal_Notification = async (req,res,next) => {
             title  :notification_obj_receiver.title,
             details : notification_obj_receiver.body
           }
-
+          console.log(Data)
             await Notification.create(Data)
           return push_notifications(notification_obj_receiver)
         }
@@ -237,12 +247,13 @@ const Goal_Notification = async (req,res,next) => {
 }
 
 
-// const task = cron.schedule("* * * * * *",( async() => {
-//   console.log("Goal_Notification()" , await Goal_Notification()) 
-// }) ,  {
-//   scheduled: false, // This will prevent the immediate execution of the task
-// });
-// task.start();
+const task = cron.schedule("* * * * * *",( async() => {
+  await Goal_Notification()
+  console.log("Goal_Notification()" ) 
+}) ,  {
+  scheduled: false, // This will prevent the immediate execution of the task
+});
+task.start();
 
 // // Schedule the task to run after 1 hour
 // // const oneHourFromNow = new Date();

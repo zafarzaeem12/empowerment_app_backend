@@ -29,10 +29,11 @@ const Report_a_Comment = async (req, res, next) => {
         reported_description: req.body.reported_description,
         reported_User_id: req.body.reported_User_id,
         reported_on_Types_id: req.body.reported_on_Types_id,
-        reported_comments : req.body.reported_comments,
+        reported_comments_id : req.body.reported_comments_id,
         is_Comment_reported_status : true
 
     }
+   
     const create_reported_comments = await Report.create(Data);
 
     res
