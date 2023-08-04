@@ -9,7 +9,7 @@ const {
 
 router.post('/create_types' ,auth , File.upload , Create_Types);
 router.get('/get' ,auth , File.upload , Get_Post);
-router.get('/filter' , auth ,File.upload , Get_Filter_Post )
+//router.get('/filter' , auth ,File.upload , Get_Filter_Post )
 
 
 module.exports = router

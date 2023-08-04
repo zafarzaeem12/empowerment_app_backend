@@ -2,6 +2,7 @@ const Preferences = require('../model/Preferences')
 const Users = require('../model/Users')
 
 const Create_New_Preference  = async (req,res,next) => {
+    const status = req.query.status;
     try{
 
         const check_Admin = await Users.findOne({ _id : req.body.User_id })
@@ -11,12 +12,11 @@ const Create_New_Preference  = async (req,res,next) => {
         }
 
         const already = await Preferences.find({  name : req.body.name })
-        
+
         if(already.length > 0) {
             return res.status(404).send({ message : "Preference already added" })
         }
-
-
+       
         const category = {
             name : req.body.name,
             User_id : req.body.User_id

@@ -12,7 +12,7 @@ const Create_Types = async (req, res, next) => {
   });
   const main_Types = req.body.type;
   try {
-    const categoryIds = req.body.category.map((cat) => cat.trim());
+    const categoryIds = req.body.category.split(',').map((cat) => cat.trim());
     const data = {
       type:
         main_Types.charAt(0).toUpperCase() + main_Types.slice(1).toLowerCase(),
@@ -76,6 +76,9 @@ const Get_Post = async (req, res, next) => {
   const type = req.query.type;
   const Preferences = req.query.Preferences;
   const createdAt =   req.query.createdAt;
+  const filter_Preference = req.body.Preferences?.split(',')
+
+
   try {
   const data =
   [
@@ -95,6 +98,7 @@ const Get_Post = async (req, res, next) => {
             'in': '$$categoryItem.name'
           }
         },
+        
         'by_title': {
           '$regexMatch': {
             'input': "$title",
@@ -237,7 +241,8 @@ const Get_Post = async (req, res, next) => {
         'by_title': true,
         'by_post_type' : true,
         'by_post_preference': {
-          '$ne': [],
+          // '$ne': [],
+          $in : filter_Preference
         },
         'createdAt': {
           '$gte': new Date(createdAt),
@@ -286,111 +291,111 @@ const Get_Post = async (req, res, next) => {
   }
 };
 
-const Get_Filter_Post = async (req, res, next) => {
+// const Get_Filter_Post = async (req, res, next) => {
   
   
-  const title = req.query.title;
-  const type = req.query.type;
-  const createdAt =   req.query.createdAt
-  const Preferences = req.query.Preferences
+//   const title = req.query.title;
+//   const type = req.query.type;
+//   const createdAt =   req.query.createdAt
+//   const Preferences = req.query.Preferences
 
 
-  try {
+//   try {
    
 
-    const data = [
-      {
-        $lookup: {
-          from: "preferences",
-          localField: "category.Preferences",
-          foreignField: "_id",
-          as: "Selected_category",
-        },
-      },
-      {
-        $addFields: {
-          'by_title': {
-            '$regexMatch': {
-              'input': "$title",
-              'regex':  new RegExp(title),
-              'options': "i",
-            },
-          },
-          'by_post_type': {
-            '$regexMatch': {
-              'input': "$type",
-              'regex': new RegExp(type),
-               'options': "i",
-            },
-          },
-          'by_post_preference': {
-            '$map': {
-              'input': "$Selected_category",
-              'as': "category",
-              'in': {
-                '$cond': {
-                  'if': {
-                    '$regexMatch': {
-                      'input': "$$category.name",
-                      'regex': new RegExp(Preferences),
-                       'options': "i",
-                    },
-                  },
-                  'then': "$$category.name",
-                  'else': "$$REMOVE",
-                },
-              },
-            },
-          },
-        },
-      },
-      {
-        '$addFields': {
-          'by_post_preference': {
-            '$filter': {
-              'input': "$by_post_preference",
-              'cond': {
-                '$ne': ["$$this", null],
-              },
-            },
-          },
-        },
-      },
-      {
-        $match: {
-          by_title: true,
-          createdAt: {
-            $gte: new Date(createdAt.toString()),
-          },
-          by_post_type: true,
-          by_post_preference: {
-            $ne: [],
-          },
-        },
-      },
-    ];
+//     const data = [
+//       {
+//         $lookup: {
+//           from: "preferences",
+//           localField: "category.Preferences",
+//           foreignField: "_id",
+//           as: "Selected_category",
+//         },
+//       },
+//       {
+//         $addFields: {
+//           'by_title': {
+//             '$regexMatch': {
+//               'input': "$title",
+//               'regex':  new RegExp(title),
+//               'options': "i",
+//             },
+//           },
+//           'by_post_type': {
+//             '$regexMatch': {
+//               'input': "$type",
+//               'regex': new RegExp(type),
+//                'options': "i",
+//             },
+//           },
+//           'by_post_preference': {
+//             '$map': {
+//               'input': "$Selected_category",
+//               'as': "category",
+//               'in': {
+//                 '$cond': {
+//                   'if': {
+//                     '$regexMatch': {
+//                       'input': "$$category.name",
+//                       'regex': new RegExp(Preferences),
+//                        'options': "i",
+//                     },
+//                   },
+//                   'then': "$$category.name",
+//                   'else': "$$REMOVE",
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//       {
+//         '$addFields': {
+//           'by_post_preference': {
+//             '$filter': {
+//               'input': "$by_post_preference",
+//               'cond': {
+//                 '$ne': ["$$this", null],
+//               },
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $match: {
+//           by_title: true,
+//           createdAt: {
+//             $gte: new Date(createdAt.toString()),
+//           },
+//           by_post_type: true,
+//           by_post_preference: {
+//             $ne: [],
+//           },
+//         },
+//       },
+//     ];
 
-    const Filter = await Types.aggregate(data);
+//     const Filter = await Types.aggregate(data);
 
-    !Filter.length > 0 
-    ?
-    res.status(404).send({ message : "Result is Empty" })
-    :
-    res.status(200).send({
-      total : Filter.length,
-      message : "Data Fetched Successfully",
-      data : Filter
-    })
+//     !Filter.length > 0 
+//     ?
+//     res.status(404).send({ message : "Result is Empty" })
+//     :
+//     res.status(200).send({
+//       total : Filter.length,
+//       message : "Data Fetched Successfully",
+//       data : Filter
+//     })
 
-  } catch (err) {
-    res.status(404).send({
-      message : err.message
-    })
-  }
-};
+//   } catch (err) {
+//     res.status(404).send({
+//       message : err.message
+//     })
+//   }
+// };
 
 module.exports = {
   Create_Types,
   Get_Post,
-  Get_Filter_Post,
+ // Get_Filter_Post,
 };
