@@ -30,6 +30,10 @@ const GoalSchema = new mongoose.Schema({
     },
     notification_time:{
         type: String
+    },
+    is_Complete:{
+        type: Boolean,
+        default : false
     }
   
 },
