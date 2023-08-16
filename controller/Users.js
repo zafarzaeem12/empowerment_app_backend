@@ -2,6 +2,59 @@ const User = require("../model/Users");
 const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
+const cloudinary = require("../middleware/cloudinary");
+
+
+
+const Complete_Profile  = async (req, res, next) => {
+  const email = req.query.email;
+  try {
+  
+    const find_email = await User.findOne({ email: email });
+
+    const data = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'auto' },
+        async(error, result) => {
+          if (error) {
+            console.error(error);
+            reject(error);
+          } else {
+            const db = moment(req.body.dob);
+            const complete_profile = await User.updateOne(
+              { _id: find_email._id },
+              {
+                $set: {
+                  user_image: result.secure_url,
+                  name: req.body.name,
+                  dob: db.format("YYYY-MM-DD"),
+                  gender: req.body.gender,
+                  address: req.body.address,
+                  state: req.body.state,
+                  city: req.body.city,
+                  role: req.body.role,
+                  user_is_profile_complete: true,
+                  is_verified: true,
+                },
+              },
+              { new: true }
+            );
+
+            res.status(200).send({
+              message: "Profile Completed Successfully",
+            });
+          }
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+  } catch (err) {
+    res.status(404).send({
+      message: "Profile Not Completed",
+    });
+  }
+};
 
 const Register_New_User = async (req, res, next) => {
   const typed_Email = req.body.email;
@@ -53,41 +106,6 @@ const Register_New_User = async (req, res, next) => {
     res.status(404).send({
       message: "OTP not created",
       status: 404,
-    });
-  }
-};
-
-const Complete_Profile = async (req, res, next) => {
-  const email = req.query.email;
-  try {
-    const find_email = await User.findOne({ email: email });
-    const userAvator = req?.file?.path?.replace(/\\/g, "/");
-    const db = moment(req.body.dob);
-    const complete_profile = await User.updateOne(
-      { email: find_email.email },
-      {
-        $set: {
-          user_image: userAvator,
-          name: req.body.name,
-          dob: db.format("YYYY-MM-DD"),
-          gender: req.body.gender,
-          address: req.body.address,
-          state: req.body.state,
-          city: req.body.city,
-          role: req.body.role,
-          user_is_profile_complete: true,
-          is_verified: true,
-        },
-      },
-      { new: true }
-    );
-
-    res.status(200).send({
-      message: "Profile Completed Successfully",
-    });
-  } catch (err) {
-    res.status(404).send({
-      message: "Profile Not Completed",
     });
   }
 };

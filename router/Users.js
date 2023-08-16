@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const auth = require('../middleware/Authentication');
 const File = require('../middleware/ImagesandVideosData');
+const Cloudinary = require("../middleware/cloudinary");
 const { 
     Register_New_User ,
     LoginRegisteredUser , 
@@ -28,7 +29,9 @@ router.post('/otp_verify' , File.upload , OTP_Verification);
 router.post('/reset_password' , File.upload , User_Reset_Password)
 router.put('/isnotify' , auth , File.upload ,  Turn_on_or_off_Notifications );
 router.post('/logout' , auth , Logout_Existing_User );
-router.post('/complete_profile' ,File.user , Complete_Profile );
+
+router.post('/complete_profile' , File.user   ,  Complete_Profile );
+
 router.post('/create_social_login_user' , File.user , Register_With_Social_Login );
 
 module.exports = router

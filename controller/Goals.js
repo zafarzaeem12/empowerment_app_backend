@@ -249,7 +249,7 @@ const Goal_Notification = async (req,res,next) => {
 }
 
 
-const task = cron.schedule("* * * * * *",( async() => {
+const task = cron.schedule("0 0 * * *",( async() => {
   await Goal_Notification()
   console.log("Goal_Notification()" ) 
 }) ,  {
