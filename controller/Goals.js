@@ -2,7 +2,7 @@
 //const url = https://marvelapp.com/prototype/hjb0j1b/screen/85462627
 const Goals = require("../model/Goals");
 const Notification = require('../model/Notification')
-const moments = require('moment-timezone');
+
 const moment = require("moment");
 var mongoose = require("mongoose");
 const cron = require('node-cron');
